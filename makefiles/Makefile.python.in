@@ -1,0 +1,85 @@
+export SHELL := /usr/bin/env TZ=UTC bash
+
+ifndef $(PYSRC_DIR)
+PYSRC_DIR := $(CURDIR)/src
+endif
+
+ifndef verbose
+.SILENT:
+endif
+
+export
+
+lint:
+	. ./scripts/lint/python.sh && lint $(PWD)/src $(PWD)/test
+
+clean::
+	@echo "++ $@"
+
+distclean::
+	@echo "++ $@"
+	-cd $(CURDIR) && \
+		find . \( -name "__pycache__" -or -path "./build*" -or -path "./.pytest_cache*" -or -path "./dist" \) -and -not -path "./.direnv*" -exec rm -Rf {} +
+
+pristine::
+	@echo "++ $@"
+	-direnv deny .envrc
+	@echo "***** Your direnv-managed Python venv has been removed and direnv disabled. To re-enable, execute: 'direnv allow', then: 'make install-deps'"
+
+check-venv::
+	@echo "++ $@"
+	if [[ -z "$${SKIP_VENV_CHECK:-}" ]] ; then \
+		if [[ "$$VIRTUAL_ENV" == "" ]] || [[ ! -d "$$VIRTUAL_ENV" ]] ; then \
+			echo "You do not appear to be in a virtualenv, make sure your direnv setup is correct" >&2 && \
+			exit 44;  \
+		fi; \
+	fi
+
+show-venv:: | check-venv
+	@echo "++ $@"
+	@echo "$(VIRTUAL_ENV)"
+
+install-poetry::
+	@echo "++ $@"
+	# will install poetry in this venv
+	pip install --upgrade poetry --ignore-installed virtualenv
+	poetry self update --no-ansi
+
+set-pyproject-vers:: check-venv install-poetry
+	@echo "++ $@"
+	poetry version $(IMG_VERSION)
+
+install-deps:: check-venv install-poetry
+	@echo "++ $@"
+	# will install deps in this venv
+	poetry install --no-ansi
+
+show-installed-deps::
+	@echo "++ $@"
+	poetry show
+
+test-all:: test-unit test-integration
+check:: test-all
+test:: test-all
+
+test-unit:: check-venv install-deps
+	@echo "++ $@"
+	pytest -m "not integration"
+
+test-integration:: check-venv install-deps
+	@echo "++ $@"
+	pytest -m "integration"
+
+package:: check-venv set-pyproject-vers install-deps test-all
+	@echo "++ $@"
+	poetry build --no-ansi && sed -i 's/^version=.*/version="0.0.0"/g' pyproject.toml
+
+publish:: check-venv package
+	@echo "++ $@"
+	poetry publish -vv
+
+extra-docker-args:
+	@echo $(EXTRA_DOCKER_ARGS)
+
+# these targets are declared "phony" so that make won't skip them if a file named after the target exists
+python-phonies := check-venv show-venv set-pyproject-vers clean distclean install-deps pristine check test test-all test-integration test-unit package publish lint
