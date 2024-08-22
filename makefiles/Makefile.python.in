@@ -12,7 +12,7 @@ ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 export
 
-lint:
+lint: install-deps
 	@echo "++ $@"
 	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && lint $(PWD)/src $(PWD)/test
 
