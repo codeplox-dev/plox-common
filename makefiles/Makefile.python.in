@@ -8,10 +8,13 @@ ifndef verbose
 .SILENT:
 endif
 
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
 export
 
 lint:
-	. ./scripts/lint/python.sh && lint $(PWD)/src $(PWD)/test
+	@echo "++ $@"
+	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && lint $(PWD)/src $(PWD)/test
 
 clean::
 	@echo "++ $@"
@@ -42,8 +45,7 @@ show-venv:: | check-venv
 install-poetry::
 	@echo "++ $@"
 	# will install poetry in this venv
-	pip install --upgrade poetry --ignore-installed virtualenv
-	poetry self update --no-ansi
+	pip install --quiet --upgrade poetry
 
 set-pyproject-vers:: check-venv install-poetry
 	@echo "++ $@"
@@ -58,8 +60,10 @@ show-installed-deps::
 	@echo "++ $@"
 	poetry show
 
+check: test lint
+	@echo "++ $@"
+
 test-all:: test-unit test-integration
-check:: test-all
 test:: test-all
 
 test-unit:: check-venv install-deps
@@ -76,7 +80,8 @@ package:: check-venv set-pyproject-vers install-deps test-all
 
 publish:: check-venv package
 	@echo "++ $@"
-	poetry publish -vv
+	poetry publish -r $(PYPI_ALIAS) --build -vv
+
 
 extra-docker-args:
 	@echo $(EXTRA_DOCKER_ARGS)
