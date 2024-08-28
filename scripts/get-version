@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+dir=$PWD
+
+[[ "${1-}" != "" ]] && dir=${1}
+
+if [[ "${VERSION-}" != "" ]]; then
+    echo "${VERSION}"
+else
+    if [[ "${IS_MASTER_MERGE-}" != "" ]]; then
+        cat "${dir}/VERSION"
+    else
+        echo "0.0.0+$(git rev-parse --short HEAD)"
+    fi
+fi
