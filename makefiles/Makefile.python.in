@@ -49,7 +49,7 @@ install-poetry::
 
 set-pyproject-vers:: check-venv install-poetry
 	@echo "++ $@"
-	poetry version $(IMG_VERSION)
+	poetry version $(VERSION)
 
 install-deps:: check-venv install-poetry
 	@echo "++ $@"
