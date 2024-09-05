@@ -16,6 +16,10 @@ lint: install-deps
 	@echo "++ $@"
 	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && lint $(PWD)/src $(PWD)/test
 
+type-check: install-deps
+	@echo "++ $@"
+	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && type-check $(PWD)/src
+
 clean::
 	@echo "++ $@"
 
@@ -49,7 +53,7 @@ install-poetry::
 
 set-pyproject-vers:: check-venv install-poetry
 	@echo "++ $@"
-	poetry version $(IMG_VERSION)
+	poetry version $(VERSION)
 
 install-deps:: check-venv install-poetry
 	@echo "++ $@"
@@ -80,8 +84,7 @@ package:: check-venv set-pyproject-vers install-deps test-all
 
 publish:: check-venv package
 	@echo "++ $@"
-	poetry publish -r $(PYPI_ALIAS) --build -vv
-
+	poetry publish $(PYPI_ALIAS) --build -vv
 
 extra-docker-args:
 	@echo $(EXTRA_DOCKER_ARGS)

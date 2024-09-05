@@ -22,3 +22,20 @@ lint(){ local src_dir="${1-src}" test_dir="${2-test}"
 
     exit $rc
 }
+
+###
+# Check that a given src/test directory passes code linting checks.
+###
+type-check(){ local src_dir="${1-src}" test_dir="${2-test}"
+    local rc=0
+
+    # Requires standard project layout; all must have symlinked common ruff
+    # config to root repo's ruff.toml
+    mypy "${src_dir}" --check || rc=$?
+
+    if [[ "${rc}" != "0" ]]; then
+        print_err "Type checking failed."
+    fi
+
+    exit $rc
+}
