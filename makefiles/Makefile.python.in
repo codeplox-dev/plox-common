@@ -80,8 +80,7 @@ package:: check-venv set-pyproject-vers install-deps test-all
 
 publish:: check-venv package
 	@echo "++ $@"
-	poetry publish -r $(PYPI_ALIAS) --build -vv
-
+	poetry publish $(PYPI_ALIAS) --build -vv
 
 extra-docker-args:
 	@echo $(EXTRA_DOCKER_ARGS)
