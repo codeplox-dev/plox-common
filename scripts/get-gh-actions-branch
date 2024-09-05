@@ -10,11 +10,11 @@ fi
 
 if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
   branch="${GITHUB_REF##*/}"
-  if [[ "${branch}" != "main" && "${branch}" != "master" ]]; then
-      echo "-r testpypi"
-  else
+  if [[ "${branch}" == "main" || "${branch}" == "master" ]]; then
       # post-PR merge, publish to official
       exit 0
+  else
+      echo "-r testpypi"
   fi
 elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
   echo "-r testpypi"
