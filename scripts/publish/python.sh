@@ -15,7 +15,7 @@ publish(){
         return
     fi
 
-    if [[ "$(is_label_present publish-test-build)" ]]; then
+    if [[ "$(is_label_present publish-test-build)" == "y" ]]; then
         poetry publish "${PYPI_ALIAS}" -vv
     else
         echo "Detected part of PR but did not detect 'publish-test-build' PR label"
