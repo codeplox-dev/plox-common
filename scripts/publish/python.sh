@@ -8,8 +8,6 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 
 publish(){
-    poetry config repositories.testpypi https://test.pypi.org/legacy/
-
     if [[ "${GITHUB_ACTIONS:-}" == "" || "$(is_part_of_active_pr)" == "n" ]]; then
         poetry publish ${PYPI_ALIAS} -vv
         return
