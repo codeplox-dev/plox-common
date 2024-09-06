@@ -84,7 +84,7 @@ package:: check-venv set-pyproject-vers install-deps test-all
 
 publish:: check-venv package
 	@echo "++ $@"
-	poetry publish $(PYPI_ALIAS) --build -vv
+	. $(ROOT_DIR)/plox-common/scripts/publish/python.sh && publish
 
 extra-docker-args:
 	@echo $(EXTRA_DOCKER_ARGS)

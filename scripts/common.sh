@@ -5,6 +5,7 @@ set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "${script_dir}/constants.sh"
 
+
 ###
 # Print a message with an info prefix to stderr.
 ###
@@ -27,28 +28,36 @@ print_func_banner(){ local funcname="${1}"
 }
 
 ###
-# Send a message as a commit status check to the CI commit.
-#
-# Side effects:
-#    * Posts a new commit check at <context> with contents <desc> and status <status>
+# Check whether the current commit/branch is part of a pull request.
 ###
-send_commit_status(){ local status="${1}" desc="${2}" context="${3}"
+is_part_of_active_pr(){
     print_func_banner "${FUNCNAME[0]}"
-    local action_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-    case "${status}" in
-        error|failure|pending|success)
-            ;;
-        *)
-            echo "ERR - commit status must be one of [error|failure|pending|success]"
-            exit 1
-            ;;
-    esac
+    if [[ "${GITHUB_ACTIONS:-}" == "" ]]; then
+        exit 0
+    fi
 
-    curl -sS -X POST \
-        -H "${GH_HEADER}" \
-        -H "Authorization: Bearer ${GH_TOK}" \
-        "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-        -d '{"state":"'"${status}"'","target_url": "'"${action_url}"'", "description":"'"${desc}"'","context":"'"${BASE_CONTEXT}/${context}"'"}' &>/d
-ev/null
+    if [[ "${GITHUB_REF_NAME}" == *"/merge"* ]]; then
+        echo "y"
+    else
+        echo "n"
+    fi
+}
+
+
+is_label_present(){ local label="${1}"
+    local pr_number
+
+    if [[ "$(is_part_of_active_pr)" == "n" ]]; then
+        echo "n"
+        return
+    fi
+
+    pr_number=$(cut -d/ -f1 <<< "${GITHUB_REF_NAME}")
+
+    if [[ "$(gh api "repos/${GITHUB_REPOSITORY}/pulls/$pr_number" --jq '.labels.[].name' | tr '\n' ' ')" == *"${label}"* ]]; then
+        echo "y"
+    else
+        echo "n"
+    fi
 }
