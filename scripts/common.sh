@@ -33,11 +33,13 @@ print_func_banner(){ local funcname="${1}"
 is_part_of_active_pr(){
     print_func_banner "${FUNCNAME[0]}"
 
+    print_info "'${GITHUB_ACTIONS}' || '${GITHUB_REF_NAME}'"
     if [[ "${GITHUB_ACTIONS:-}" == "" ]]; then
         exit 0
     fi
 
     if [[ "${GITHUB_REF_NAME}" == *"/merge"* ]]; then
+        print_info 'Detected github ref_name as PR candidate, returning yes'
         echo "y"
     else
         echo "n"
@@ -54,10 +56,12 @@ is_label_present(){ local label="${1}"
     fi
 
     pr_number=$(cut -d/ -f1 <<< "${GITHUB_REF_NAME}")
+    print_info "Checking PR ${pr_number} for labels..."
 
     if [[ "$(gh api "repos/${GITHUB_REPOSITORY}/pulls/$pr_number" --jq '.labels.[].name' | tr '\n' ' ')" == *"${label}"* ]]; then
         echo "y"
     else
+        print_info "Did not detect ${label} on current PR"
         echo "n"
     fi
 }
