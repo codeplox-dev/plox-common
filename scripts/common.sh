@@ -48,14 +48,12 @@ is_part_of_active_pr(){
 
 
 is_label_present(){ local label="${1}"
-    local pr_number
-
     if [[ "$(is_part_of_active_pr)" == "n" ]]; then
         echo "n"
         return
     fi
 
-    print_info "Checking PR ${pr_number} for labels..."
+    print_info "Checking PR ${GH_PR_NUMBER} for labels..."
 
     if [[ "$(gh api "repos/${GITHUB_REPOSITORY}/pulls/$GH_PR_NUMBER" --jq '.labels.[].name' | tr '\n' ' ')" == *"${label}"* ]]; then
         echo "y"
