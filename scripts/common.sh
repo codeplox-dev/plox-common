@@ -33,12 +33,12 @@ print_func_banner(){ local funcname="${1}"
 is_part_of_active_pr(){
     print_func_banner "${FUNCNAME[0]}"
 
-    print_info "'${GITHUB_ACTIONS}' || '${GITHUB_REF_NAME}'"
+    print_info "'${GITHUB_ACTIONS}' || '${GITHUB_REF_NAME}' || '${GH_PR_NUMBER}'"
     if [[ "${GITHUB_ACTIONS:-}" == "" ]]; then
         exit 0
     fi
 
-    if [[ "${GITHUB_REF_NAME}" == *"/merge"* ]]; then
+    if [[ "${GH_PR_NUMBER}" != "" ]]; then
         print_info 'Detected github ref_name as PR candidate, returning yes'
         echo "y"
     else
