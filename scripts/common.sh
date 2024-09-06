@@ -55,10 +55,9 @@ is_label_present(){ local label="${1}"
         return
     fi
 
-    pr_number=$(cut -d/ -f1 <<< "${GITHUB_REF_NAME}")
     print_info "Checking PR ${pr_number} for labels..."
 
-    if [[ "$(gh api "repos/${GITHUB_REPOSITORY}/pulls/$pr_number" --jq '.labels.[].name' | tr '\n' ' ')" == *"${label}"* ]]; then
+    if [[ "$(gh api "repos/${GITHUB_REPOSITORY}/pulls/$GH_PR_NUMBER" --jq '.labels.[].name' | tr '\n' ' ')" == *"${label}"* ]]; then
         echo "y"
     else
         print_info "Did not detect ${label} on current PR"
