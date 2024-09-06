@@ -5,6 +5,7 @@ set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "${script_dir}/constants.sh"
 
+
 ###
 # Print a message with an info prefix to stderr.
 ###
@@ -27,28 +28,37 @@ print_func_banner(){ local funcname="${1}"
 }
 
 ###
-# Send a message as a commit status check to the CI commit.
-#
-# Side effects:
-#    * Posts a new commit check at <context> with contents <desc> and status <status>
+# Check whether the current commit/branch is part of a pull request.
 ###
-send_commit_status(){ local status="${1}" desc="${2}" context="${3}"
+is_part_of_active_pr(){
     print_func_banner "${FUNCNAME[0]}"
-    local action_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-    case "${status}" in
-        error|failure|pending|success)
-            ;;
-        *)
-            echo "ERR - commit status must be one of [error|failure|pending|success]"
-            exit 1
-            ;;
-    esac
+    print_info "'${GITHUB_ACTIONS}' || '${GITHUB_REF_NAME}' || '${GH_PR_NUMBER}'"
+    if [[ "${GITHUB_ACTIONS:-}" == "" ]]; then
+        exit 0
+    fi
 
-    curl -sS -X POST \
-        -H "${GH_HEADER}" \
-        -H "Authorization: Bearer ${GH_TOK}" \
-        "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-        -d '{"state":"'"${status}"'","target_url": "'"${action_url}"'", "description":"'"${desc}"'","context":"'"${BASE_CONTEXT}/${context}"'"}' &>/d
-ev/null
+    if [[ "${GH_PR_NUMBER}" != "" ]]; then
+        print_info 'Detected github ref_name as PR candidate, returning yes'
+        echo "y"
+    else
+        echo "n"
+    fi
+}
+
+
+is_label_present(){ local label="${1}"
+    if [[ "$(is_part_of_active_pr)" == "n" ]]; then
+        echo "n"
+        return
+    fi
+
+    print_info "Checking PR ${GH_PR_NUMBER} for labels..."
+
+    if [[ "$(gh api "repos/${GITHUB_REPOSITORY}/pulls/$GH_PR_NUMBER" --jq '.labels.[].name' | tr '\n' ' ')" == *"${label}"* ]]; then
+        echo "y"
+    else
+        print_info "Did not detect ${label} on current PR"
+        echo "n"
+    fi
 }
