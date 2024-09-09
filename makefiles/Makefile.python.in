@@ -14,11 +14,11 @@ export
 
 lint: install-deps
 	@echo "++ $@"
-	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && lint $(PWD)/src $(PWD)/test
+	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && lint $(SRC_DIR) $(PWD)/test
 
 type-check: install-deps
 	@echo "++ $@"
-	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && type-check $(PWD)/src
+	. $(ROOT_DIR)/plox-common/scripts/lint/python.sh && type-check $(SRC_DIR)
 
 clean::
 	@echo "++ $@"
@@ -64,7 +64,7 @@ show-installed-deps::
 	@echo "++ $@"
 	poetry show
 
-check: test lint
+check: test lint type-check
 	@echo "++ $@"
 
 test-all:: test-unit test-integration
