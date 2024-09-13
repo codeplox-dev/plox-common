@@ -80,7 +80,8 @@ test-integration:: check-venv install-deps
 
 package:: check-venv set-pyproject-vers install-deps test-all
 	@echo "++ $@"
-	poetry build --no-ansi && sed -i 's/^version=.*/version="0.0.0"/g' pyproject.toml
+	poetry build --no-ansi
+	poetry version 0.0.0 &>/dev/null
 
 publish:: check-venv package
 	@echo "++ $@"
