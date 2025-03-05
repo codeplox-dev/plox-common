@@ -9,8 +9,6 @@ indent-width = 4
 select = ["D", "E", "F", "W", "I", "N", "UP", "ANN", "Q", "RUF", "ASYNC", "S", "B", "A", "C4", "T20", "SIM"]
 
 ignore = [
-  "ANN101", # Missing type annotation for {name} in method
-  "ANN102", # Missing type annotation for {name} in classmethod
   "ANN202", # Missing return type annotation for private function {name}
   "ANN204", # Missing return type annotation for special method
   "ANN206", # Missing return type annotation for classmethod {name}
