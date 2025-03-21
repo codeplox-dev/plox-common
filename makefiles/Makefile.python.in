@@ -85,8 +85,10 @@ package:: check-venv set-pyproject-vers install-deps test-all
 
 publish:: check-venv package
 	@echo "++ $@"
+	$(MAKE) set-pyproject-vers
 	poetry config repositories.testpypi https://test.pypi.org/legacy/
 	. $(ROOT_DIR)/plox-common/scripts/publish/python.sh && publish
+	poetry version 0.0.0 &>/dev/null
 
 extra-docker-args:
 	@echo $(EXTRA_DOCKER_ARGS)
