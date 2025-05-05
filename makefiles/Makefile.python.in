@@ -75,7 +75,7 @@ test-integration:: check-venv install-deps
 
 package:: check-venv set-pyproject-vers install-deps test-all
 	@echo "++ $@"
-	uv build --frozen
+	uv build
 
 publish:: check-venv package
 	@echo "++ $@"
