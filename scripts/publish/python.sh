@@ -8,11 +8,17 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 
 publish(){
-    if [[ "${GITHUB_ACTIONS:-}" == "" || "$(is_default_branch)" == "y" ]]; then
+    # allow local publishing to testpypi
+    if [[ "${GITHUB_ACTIONS:-}" == "" ]]; then
+        uv publish --index testpypi -vv
+        return 0
+    fi
+
+    if [[ "$(is_default_branch)" == "y" ]]; then
         uv publish --index pypi -vv
         return
     else
-        print_info "${BRANCH_NAME} != default (${DEFAULT_BRANCH}), not publishing"
+        print_info "${BRANCH_NAME} != default (${DEFAULT_BRANCH}), not publishing to main"
     fi
 
     if [[ "$(is_label_present publish-test-build)" == "y" ]]; then
