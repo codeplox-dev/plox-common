@@ -27,6 +27,15 @@ print_func_banner(){ local funcname="${1}"
     printf "============================ Inside: %s ============================\n" "${funcname}" >&2;
 }
 
+is_default_branch(){
+    print_func_banner "${FUNCNAME[0]}"
+    if [[ "${BRANCH_NAME}" == "${DEAFULT_BRANCH}" ]]; then
+        echo "y"
+    else
+        echo "n"
+    fi
+}
+
 ###
 # Check whether the current commit/branch is part of a pull request.
 ###
