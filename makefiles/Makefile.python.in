@@ -46,23 +46,18 @@ show-venv:: | check-venv
 	@echo "++ $@"
 	@echo "$(VIRTUAL_ENV)"
 
-install-poetry::
+set-pyproject-vers:: check-venv
 	@echo "++ $@"
-	# will install poetry in this venv
-	pip install --quiet --upgrade poetry
+	uv version $(VERSION)
 
-set-pyproject-vers:: check-venv install-poetry
-	@echo "++ $@"
-	poetry version $(VERSION)
-
-install-deps:: check-venv install-poetry
+install-deps:: check-venv
 	@echo "++ $@"
 	# will install deps in this venv
-	poetry install --no-ansi
+	uv sync --frozen --dev
 
 show-installed-deps::
 	@echo "++ $@"
-	poetry show
+	uv tree --locked --all-groups
 
 check: test lint type-check
 	@echo "++ $@"
@@ -80,12 +75,10 @@ test-integration:: check-venv install-deps
 
 package:: check-venv set-pyproject-vers install-deps test-all
 	@echo "++ $@"
-	poetry build --no-ansi
-	poetry version 0.0.0 &>/dev/null
+	uv build
 
 publish:: check-venv package
 	@echo "++ $@"
-	poetry config repositories.testpypi https://test.pypi.org/legacy/
 	. $(ROOT_DIR)/plox-common/scripts/publish/python.sh && publish
 
 extra-docker-args:
